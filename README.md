@@ -2,6 +2,10 @@
 
 Trabajo de Visión por Computador realizado por David Cornejo. Desarrollado con Python en Google Colab, haciendo uso de las librerías "cv2" y "numpy" y utilizando el dataset de imágenes "COCO".
 
+Dataset utilizado: https://paperswithcode.com/dataset/coco perteneciente al conjunto de datasets de Mask R-CNN: https://arxiv.org/abs/1703.06870
+
+Para más información, visita [el siguiente video](https://youtu.be/JPAmn4HmydQ?si=kvDb5Px4R-wyOFqp).
+
 ---
 
 ## Mask R-CNN:
@@ -74,6 +78,34 @@ for i in range(detection_count):
 
 Si utilizamos éstas coordenadas en conjunto con un método que nos permita generar rectángulos (Rectangle, de OpenCV) ya podemos mostrar el resultado de la detección de objetos en la imagen, simplemente enviamos las coordenadas devueltas por el modelo, al método de dibujado de rectángulos, y obtenemos lo siguiente:
 
+![Resultado detección de elementos en la imagen](resultados/resultado.png)
+
+6. Ahora, para obtener las máscaras de los objetos seleccionados, hacemos uso de la función Threshold, con la cual generaremos una máscara por cada objeto encontrado en la imagen (dentro del for):
+
+```py
+	# Obtenemos la máscara del objeto
+	mask = masks[i, int(class_id)]
+	mask = cv2.resize(mask, (roi_width, roi_height))
+	_, mask = cv2.threshold(mask, 0.5, 255, cv2.THRESH_BINARY)
+```
+
+También utilizamos un conjunto de id’s que corresponden con la id de cada objeto encontrado en la imagen. Éstas id’s hacen referencia al tipo de objeto que se ha encontrado en la imagen, y es con éstas id’s con las que se puede diferenciar entre un objeto y otro.
+
+7. Dibujamos las máscaras en la imagen en blanco y negro, haciendo uso del método filPoly que sirve para el trazado de curvas. Finalmente, pintamos cada objeto de un color distinto, dependiendo de su id de objeto:
+
+```py
+	# Obtenemos las coordenadas de la máscara en la imagen
+	contours, _ = cv2.findContours(np.array(mask, np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+	color = colors[int(class_id)]
+
+  # Dibujamos las coordenadas de la máscara con la funcion fillPoly. (Polilíneas)
+	for cnt in contours:
+		cv2.fillPoly(roi, [cnt], (int(color[0]), int(color[1]), int(color[2])))
+```
+
+El resultado es el siguiente:
+
+![Resultado shapes de los objetos detectados en la imagen](resultados/resultado-shapes.png)
 
 
 
